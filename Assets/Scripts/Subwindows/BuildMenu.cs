@@ -64,14 +64,59 @@ public class BuildMenu : MonoBehaviour
             currentPrefab.Ores.text = building.ResourceToBuild.Ores.ToString();
             currentPrefab.ManaStones.text = building.ResourceToBuild.ManaStones.ToString();
             currentPrefab.linkedBuilding = building.buildingType;
-            currentPrefab.BuildLimit.text = $"{empire.EmpireBuildingLimit[building.buildingType]} Remaining";
-            if (empire.EmpireBuildingLimit[building.buildingType] <= -1)
+            int remaining = 0;
+            switch (building.buildingType)
+            {
+                case ConstructibleType.WorkCamp:
+                    remaining = Config.BuildConfig.WorkCamp.BuildLimit;
+                    break;
+                case ConstructibleType.LumberSite:
+                    remaining = Config.BuildConfig.LumberSite.BuildLimit;
+                    break;
+                case ConstructibleType.Quarry:
+                    remaining = Config.BuildConfig.Quarry.BuildLimit;
+                    break;
+                case ConstructibleType.CasterTower:
+                    remaining = Config.BuildConfig.CasterTower.BuildLimit;
+                    break;
+                case ConstructibleType.BarrierTower:
+                    remaining = Config.BuildConfig.BarrierTower.BuildLimit;
+                    break;
+                case ConstructibleType.DefEncampment:
+                    remaining = Config.BuildConfig.DefenseEncampment.BuildLimit;
+                    break;
+                case ConstructibleType.Academy:
+                    remaining = Config.BuildConfig.Academy.BuildLimit;
+                    break;
+                case ConstructibleType.DarkMagicTower:
+                    remaining = Config.BuildConfig.DarkMagicTower.BuildLimit;
+                    break;
+                case ConstructibleType.TemporalTower:
+                    remaining = Config.BuildConfig.TemporalTower.BuildLimit;
+                    break;
+                case ConstructibleType.Laboratory:
+                    remaining = Config.BuildConfig.Laboratory.BuildLimit;
+                    break;
+                case ConstructibleType.Teleporter:
+                    remaining = Config.BuildConfig.Teleporter.BuildLimit;
+                    break;
+                case ConstructibleType.TownHall:
+                    remaining = Config.BuildConfig.TownHall.BuildLimit;
+                    break;
+                default:
+                    break;
+            }
+            if (remaining >= 0)
+            {
+                currentPrefab.BuildLimit.text = $"{remaining - empire.EmpireBuildingLimit[building.buildingType]} Remaining";
+                if (!empire.constructionResources.CanBuildWithCurrentResources(building.ResourceToBuild) || building.GoldCost > empire.Gold || !empire.WithinBuildLimit(building.buildingType))
+                {
+                    currentPrefab.Construct.interactable = false;
+                }
+            }
+            else
             {
                 currentPrefab.BuildLimit.gameObject.SetActive(false);
-            }
-            if (!empire.constructionResources.CanBuildWithCurrentResources(building.ResourceToBuild) || building.GoldCost > empire.Gold || !empire.WithinBuildLimit(building.buildingType))
-            {
-                currentPrefab.Construct.interactable = false;
             }
             currentPrefab.Construct.onClick.AddListener(() =>
             {

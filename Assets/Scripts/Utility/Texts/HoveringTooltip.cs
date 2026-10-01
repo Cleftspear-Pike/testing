@@ -48,6 +48,18 @@ public class HoveringTooltip : MonoBehaviour
         InfoUpdate(description);
     }
 
+    public void UpdateInformationTags(Unit unit)
+    {
+        string description = GetTagDescription(unit);
+        InfoUpdate(description);
+    }
+
+    public void UpdateInformationPotion(Unit unit)
+    {
+        string description = GetPotionDescription(unit);
+        InfoUpdate(description);
+    }
+
     public void UpdateInformation(Slider slider)
     {
         //rect.sizeDelta = new Vector2(350, 80);
@@ -59,6 +71,25 @@ public class HoveringTooltip : MonoBehaviour
     {
         string description = "Click to show the information for this consumed unit";
         InfoUpdate(description);
+    }
+
+    string GetTagDescription(Unit unit)
+    {
+        string desc = "";
+        var alltags = TagConditionChecker.GetCombinedUnitTags(unit);
+        foreach (var tag in alltags) {
+            desc += tag.name + "\n";
+        }
+        return desc;
+    }
+
+    string GetPotionDescription(Unit unit)
+    {
+        string desc = "";
+        foreach (var pot in unit.EquippedPotions) {
+            desc += State.World.ItemRepository.GetItem(pot.Key).Name + " x" + pot.Value[0] + "\n";
+        }
+        return desc;
     }
 
     string GetTraitDescription(string[] words)
@@ -276,7 +307,7 @@ public class HoveringTooltip : MonoBehaviour
                     case StatusEffectType.Marked:
                         return $"Unit has {(effect.Strength)}% added to weapon accuracy against them.";
                     case StatusEffectType.Gorging:
-                        return $"Unit gains +{(int)(effect.Strength * 10)} effective stomach capacity. Unit will fall asleep for {(int)(effect.Strength)} turn(s) if this effect expires and they are overcapacity.";
+                        return $"Unit gains +{(int)(effect.Strength * 10)} to their base stomach capacity. Unit will fall asleep for {(int)(effect.Strength)} turn(s) if this effect expires and they are overcapacity.";
                     case StatusEffectType.Stunned:
                         return $"Unit is unable to move for {(effect.Duration)} turn(s).";
                 }
@@ -499,19 +530,19 @@ public class HoveringTooltip : MonoBehaviour
         switch (trait)
         {
             case Traits.Resilient:
-                return "Takes less damage from attacks";
+                return "Unit takes 1 less damage from weapon attacks.";
             case Traits.FastDigestion:
-                return "Unit digests prey faster than normal";
+                return "Unit digests prey 50% faster than normal";
             case Traits.SlowDigestion:
-                return "Unit digests prey slower than normal";
+                return "Unit digests prey 50% slower than normal";
             case Traits.Intimidating:
                 return "Enemies within 1 tile get a penalty to accuracy against all targets";
             case Traits.AdeptLearner:
                 return "All stats are favored, randomly get 1 point in 2 different stats with level up";
             case Traits.SlowBreeder:
-                return "Race produces new population at a slower rate than normal";
+                return "Race produces new population at a rate 30% slower than normal";
             case Traits.ProlificBreeder:
-                return "Race produces new population at a faster rate than normal";
+                return "Race produces new population at a rate 75% faster than normal";
             case Traits.Flight:
                 return "Unit can pass through obstacles and other units in tactical mode.\nMust end turn on solid ground\nIf you try to take an action or end your turn in an invalid place, it will automatically undo your movement";
             case Traits.Pounce:
@@ -749,7 +780,7 @@ public class HoveringTooltip : MonoBehaviour
             case Traits.ManaBarrier:
                 return "Up to 50% of damage taken by unit instead spends mana, this trait loses 1% effectivity for every 1% missing mana percentage.";
             case Traits.Unflinching:
-                return "Unit's BladeDance, Tenacity, and Focus stack loss is reduced if the stack's total is below 10% of the unit's current HP.";
+                return "Unit's BladeDance, Tenacity, and Focus stack loss is reduced by 3 if stacks are below 10% current HP.";
             case Traits.Annihilation:
                 return "Every time digestion progresses, this unit digests one level from each prey inside them, gaining its experience value. If a unit hits level 0 this way, it dies if it was still alive and cannot be revived.\n(Cheat Trait)";
             case Traits.WeaponChanneler:
@@ -914,7 +945,7 @@ public class HoveringTooltip : MonoBehaviour
             case Traits.Multifaceted when unit == null || State.GameManager.CurrentScene == State.GameManager.Start_Mode: // Can't be too sure now can we?
                 return "Units highest stat becomes its favored stat and gains the following effect based on their highest stat:\n" +
                     "STR: Bonus damage on a 4 turn cooldown.\n" +
-                    "DEX: 1 additional attack per turn, lasting one turn per level.\n" +
+                    "DEX: 1 additional attack per turn, +10% accuracy, lasting one turn per level.\n" +
                     "VOR: Failed vore attempt grants predation\n" +
                     "AGI: +2 mov above 50%hp +10% Dodge below.\n" +
                     "WILL: Spells apply barrier on allies and mark on enemies.\n" +
@@ -924,7 +955,7 @@ public class HoveringTooltip : MonoBehaviour
             case Traits.Multifaceted when unit.GetHighestStatIndex() == 0:
                 return "Units highest stat becomes its favored stat and gains the following effect:\n" + "<b>Violent(Str)</b>: Weapon attacks deal 5% of the target's Max HP once every 4 turns.\n" + (actor == null ? "" : $"Avalible in: {actor.MultifacetedCooldown} turn(s).");
             case Traits.Multifaceted when unit.GetHighestStatIndex() == 1:
-                return "Units highest stat becomes its favored stat and gains the following effect:\n" + "<b>Excitable(Dex)</b>: Unit gans 1 additional attack per turn, lasting one turn per level.\n" + (actor == null ? "" : actor.Unit.Level - State.GameManager.TacticalMode.currentTurn >= 0 ? ($"Remaining Turns: {actor.Unit.Level - State.GameManager.TacticalMode.currentTurn}") : "<b>Inactive.</b>");
+                return "Units highest stat becomes its favored stat and gains the following effect:\n" + "<b>Excitable(Dex)</b>: Unit gans 1 additional attack per turn and +10% accuracy, lasting one turn per level.\n" + (actor == null ? "" : actor.Unit.Level - State.GameManager.TacticalMode.currentTurn >= 0 ? ($"Remaining Turns: {actor.Unit.Level - State.GameManager.TacticalMode.currentTurn}") : "<b>Inactive.</b>");
             case Traits.Multifaceted when unit.GetHighestStatIndex() == 2:
                 return "Units highest stat becomes its favored stat and gains the following effect:\n" + "<b>Intrepid(Vor)</b>: A failed vore attempt grants predation to this unit.";
             case Traits.Multifaceted when unit.GetHighestStatIndex() == 3:
